@@ -7,6 +7,7 @@ public class LevelGenerator : MonoBehaviour
     private static GameObject coinPrefab;
     private static int numberOfPlatforms = 2;
     private static float levelWidth = 4;
+
     public static GameObject coingen;
     public static GameObject[] Platforms = new GameObject[4];//Keep twice the number of platforms
     public static int current_platform = 0;

@@ -22,14 +22,26 @@ public class MenuButtonControl : MonoBehaviour {
 
 	public void restartGame()
     {
-        resetState();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        //resetState();
+        if (FizSession.sets > 0)
+        {
+            HealthControl.lives = FizSession.breaths;
+            FizSession.sets--;
+            SceneManager.LoadScene("Game");
+            LevelGenerator.spawnPosY = -3.8f;
+        }
+        else
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
+        GameOverMenu.gameIsOver = false;
     }
 
     public void backToMainMenu()
     {
-        resetState();
+        //resetState();
         SceneManager.LoadScene("MainMenu");
+        GameOverMenu.gameIsOver = false;
     }
 
     public void pauseGame()

@@ -44,15 +44,13 @@ namespace Fizzyo
         ///<summary>
         ///The game ID given by the Fizzyo API
         ///</summary>
-        //public string gameID = "87f2ae03-d34f-4045-a308-feb746e857b2";
-        public string gameID = "18ff9014-687b-4e8c-a423-30daec586282";
+        public string gameID = "87f2ae03-d34f-4045-a308-feb746e857b2";
 
         [Tooltip("Game secret given by Fizzyo API.")]
         ///<summary>
         ///The game secret given by the Fizzyo API
         ///</summary>
-        //public string gameSecret = "7BErm0wMvbmXMpq6ANBNLnAaYAlO1nqVqM15wNJAPdRom7lYyKKOEzqeGyOXpZKn";
-        public string gameSecret = "9w3Bk61YQdJQ4WODE8rpRyDbOGpJZn4WNR8M7Vl4zbqDR3ll1Vo0vryaprOZqEgL";
+        public string gameSecret = "7BErm0wMvbmXMpq6ANBNLnAaYAlO1nqVqM15wNJAPdRom7lYyKKOEzqeGyOXpZKn";
 
         [Header("Test Harness")]
 
@@ -70,6 +68,11 @@ namespace Fizzyo
         public TestHarnessData testHarnessDataFile = TestHarnessData.p1_acapella;
 
         ///<summary>
+        ///API http path
+        ///</summary>
+        public string apiPath = "https://api.fizzyo-ucl.co.uk/";
+
+        ///<summary>
         ///The singleton instance of the Fizzyo Framework
         ///</summary>
         public static FizzyoFramework _instance = null;
@@ -77,6 +80,7 @@ namespace Fizzyo
         public FizzyoDevice Device { get; set; }
         public FizzyoAchievements Achievements { get; set; }
         public BreathRecogniser Recogniser { get; set; }
+        public FizzyoAnalytics Analytics {get; set;}
 
         private static object _lock = new object();
         private static bool applicationIsQuitting = false;
@@ -150,11 +154,12 @@ namespace Fizzyo
             Device = new FizzyoDevice();
             Recogniser = new BreathRecogniser();
             Achievements = new FizzyoAchievements();
+            Analytics = new FizzyoAnalytics();
         }
 
 
 
-        void Start()
+        void Awake()
         {
             Debug.Log("[FizzyoFramework] Start.");
 
@@ -173,7 +178,7 @@ namespace Fizzyo
 #endif
             }
 
-            
+
             if (showCalibrateAutomatically && !Device.Calibrated)
             {
                 Scene scene = SceneManager.GetActiveScene();
@@ -184,6 +189,16 @@ namespace Fizzyo
 
 
         }
+
+        void OnApplicationQuit()
+        {
+            if(Analytics != null) 
+            {
+                Analytics.PostOnQuit();
+            }
+            Debug.Log("[FizzyoFramework] Analytics is Null.");
+        }
+
 
 
         private void Update()
@@ -277,6 +292,7 @@ namespace Fizzyo
             return true;
         }
 
+        
 
 
 

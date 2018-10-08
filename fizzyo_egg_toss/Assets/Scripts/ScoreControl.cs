@@ -8,10 +8,15 @@ public class ScoreControl : MonoBehaviour
     private TextMeshProUGUI scoreText;
     private TextMeshProUGUI gameOverScoreText;
 
+    void Start()
+    {
+        scoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
+    }
+
     void Update()
     {
         // Constantly update score text
-        scoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
+        
         scoreText.text = currentScore.ToString();
 
         if (GameOverMenu.gameIsOver && GameObject.Find("GameOverScoreText") != null)

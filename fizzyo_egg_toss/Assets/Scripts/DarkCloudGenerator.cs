@@ -25,7 +25,8 @@ public class DarkCloudGenerator : MonoBehaviour
                 prevTime = currentTime;
                 for (int i = 0; i < 2; i++)
                 {
-                    Instantiate(darkCloud, new Vector3(Random.Range(-4.5f, 4.5f), Random.Range(mCamera.position.y - 4f, mCamera.position.y + 4f), -1), Quaternion.identity).transform.parent = mCamera;
+                    Vector3 position = new Vector3(Random.Range(-4.5f, 4.5f), Random.Range(mCamera.position.y - 4f, mCamera.position.y + 4f), -1);
+                    Instantiate(darkCloud, position, Quaternion.identity).transform.parent = mCamera;
                 }
             }
         }

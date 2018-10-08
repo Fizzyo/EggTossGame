@@ -68,17 +68,17 @@ public class OnCollision : MonoBehaviour
                         if (LevelGenerator.Platforms[1] == gameObject && LevelGenerator.Platforms[0].GetComponent<EdgeCollider2D>().enabled == true)
                         {
                             LevelGenerator.Platforms[0].GetComponent<EdgeCollider2D>().enabled = false;
-                            ScoreControl.currentScore += 2;
+                            ScoreControl.currentScore += 200;
 
                         }
                         else if (LevelGenerator.Platforms[3] == gameObject && LevelGenerator.Platforms[2].GetComponent<EdgeCollider2D>().enabled == true)
                         {
                             LevelGenerator.Platforms[2].GetComponent<EdgeCollider2D>().enabled = false;
-                            ScoreControl.currentScore += 2;
+                            ScoreControl.currentScore += 200;
                         }
                         else
                         {
-                            ScoreControl.currentScore += 1;
+                            ScoreControl.currentScore += 100;
                         }
                         
                         AchievementControl.consectJump += 1;
