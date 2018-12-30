@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using System;
 namespace Fizzyo
 {
-    
     /// <summary>
     /// Provides data about the current breath to the receiver when the ExhalationComplete event fires
     /// </summary>
@@ -17,8 +15,6 @@ namespace Fizzyo
         private bool isBreathFull = false;
         private float breathPercentage = 0;
         private int breathQuality = 0;
-        
-
 
         public ExhalationCompleteEventArgs(float breathLength, int breathCount, float exhaledVolume, bool isBreathFull, float breathPercentage, int breathQuality)
         {
@@ -28,7 +24,6 @@ namespace Fizzyo
             this.isBreathFull = isBreathFull;
             this.breathPercentage = breathPercentage;
             this.breathQuality = breathQuality;
-
         }
 
         ///<summary>
@@ -128,6 +123,8 @@ namespace Fizzyo
     /// </summary>
     public class BreathRecogniser
     {
+        public static bool topQualityBreath = false;
+
         private float breathLength = 0;
         private int breathCount = 0;
         private int goodBreaths = 0;
@@ -139,19 +136,14 @@ namespace Fizzyo
         private const float kTollerance = 0.80f;
         private float minBreathThreshold = .05f;
         private float breathPercentage = 0;
-        
 
         public event ExhalationCompleteEventHandler BreathComplete;
         public event ExhalationStartedEventHandler BreathStarted;
-
-        
 
         public BreathRecogniser()
         {
 
         }
-
-
 
         /// The length of the current exhaled breath in seconds
         public float BreathLength
@@ -339,7 +331,10 @@ namespace Fizzyo
             else if (breathPercentage < 1.0f && breathPercentage > 0.75f)
                 quality = 3;
             else if (breathPercentage >= 1.0f)
+            {
                 quality = 4;
+                topQualityBreath = true;
+            }
 
             return quality;
         }
@@ -367,7 +362,6 @@ namespace Fizzyo
             }
         }
 
-
         ///<summary>
         /// Invoke the event - called whenever exhalation starts
         ///</summary>
@@ -379,6 +373,9 @@ namespace Fizzyo
             }
         }
 
-
+        void LateUpdate()
+        {
+            topQualityBreath = false;
+        }
     }
 }

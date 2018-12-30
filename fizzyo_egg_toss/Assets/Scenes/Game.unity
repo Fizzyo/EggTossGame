@@ -1695,7 +1695,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 114219940395657868, guid: aa72f9f33add6b94eb9e15f1ba5a104e,
     type: 2}
   m_PrefabInternal: {fileID: 1908364787}
-  m_Script: {fileID: 1453722849, guid: 89f0137620f6af44b9ba852b4190e64e, type: 3}
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
 --- !u!1 &362001932
 GameObject:
   m_ObjectHideFlags: 0
@@ -3641,7 +3641,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 114219940395657868, guid: aa72f9f33add6b94eb9e15f1ba5a104e,
     type: 2}
   m_PrefabInternal: {fileID: 1718917455}
-  m_Script: {fileID: 1453722849, guid: 89f0137620f6af44b9ba852b4190e64e, type: 3}
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
 --- !u!1001 &1004541049
 Prefab:
   m_ObjectHideFlags: 0
