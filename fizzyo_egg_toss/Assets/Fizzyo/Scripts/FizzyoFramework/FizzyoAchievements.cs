@@ -85,33 +85,54 @@ namespace Fizzyo
         /// </returns> 
         public FizzyoRequestReturnType LoadAchievements()
         {
-            //Get all achievements from server
-            string getAchievements = "https://api.fizzyo-ucl.co.uk/api/v1/games/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/achievements"; 
-
-            Dictionary<string, string> headers = new Dictionary<string, string>();
-            headers.Add("Authorization", "Bearer " + FizzyoFramework.Instance.User.AccessToken);
-            WWW sendGetAchievements = new WWW(getAchievements, null, headers);
-
-            while (!sendGetAchievements.isDone) { }
-
-            string achievementsJSONData = sendGetAchievements.text;
-            allAchievements = JsonUtility.FromJson<AllAchievementData>(achievementsJSONData).achievements;
-             
-            //get unlocked achievements
-            string getUnlock = "https://api.fizzyo-ucl.co.uk/api/v1/users/" + FizzyoFramework.Instance.User.UserID + "/unlocked-achievements/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID;
-
-            headers = new Dictionary<string, string>();
-            headers.Add("Authorization", "Bearer " + FizzyoFramework.Instance.User.AccessToken);
-            WWW sendGetUnlock = new WWW(getUnlock, null, headers);
-
-            while (!sendGetUnlock.isDone) { }
-
-            if(sendGetUnlock.error != null)
+            if (FizzyoNetworking.loginResult != LoginReturnType.SUCCESS)
             {
                 return FizzyoRequestReturnType.FAILED_TO_CONNECT;
             }
 
-            string unlockedJSONData = sendGetUnlock.text;
+            LoadAllAchievements();
+            LoadUnlockedAchievements();
+
+            return FizzyoRequestReturnType.SUCCESS;
+        }
+
+        internal FizzyoRequestReturnType LoadAllAchievements()
+        {
+            if (FizzyoNetworking.loginResult != LoginReturnType.SUCCESS)
+            {
+                return FizzyoRequestReturnType.FAILED_TO_CONNECT;
+            }
+
+            //Get all achievements from server
+            var webRequest = FizzyoNetworking.GetWebRequest(FizzyoNetworking.ApiEndpoint + "games/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/achievements");
+            webRequest.SendWebRequest();
+
+            while (!webRequest.isDone) { }
+
+            string achievementsJSONData = webRequest.downloadHandler.text;
+            allAchievements = JsonUtility.FromJson<AllAchievementData>(achievementsJSONData).achievements;
+
+            return FizzyoRequestReturnType.SUCCESS;
+        }
+        internal FizzyoRequestReturnType LoadUnlockedAchievements()
+        {
+            if (FizzyoNetworking.loginResult != LoginReturnType.SUCCESS)
+            {
+                return FizzyoRequestReturnType.FAILED_TO_CONNECT;
+            }
+
+            //get unlocked achievements
+            var webRequest = FizzyoNetworking.GetWebRequest(FizzyoNetworking.ApiEndpoint + "users/" + FizzyoFramework.Instance.User.UserID + "/unlocked-achievements/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID);
+            webRequest.SendWebRequest();
+
+            while (!webRequest.isDone) { }
+
+            if (webRequest.error != null)
+            {
+                return FizzyoRequestReturnType.FAILED_TO_CONNECT;
+            }
+
+            string unlockedJSONData = webRequest.downloadHandler.text;
             unlockedAchievements = JsonUtility.FromJson<AllAchievementData>(unlockedJSONData).unlockedAchievements;
 
 
@@ -131,20 +152,21 @@ namespace Fizzyo
         /// </returns> 
         public FizzyoRequestReturnType GetHighscores()
         {
-            string getHighscores = "https://api.fizzyo-ucl.co.uk/api/v1/games/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/highscores";
+            if (FizzyoNetworking.loginResult != LoginReturnType.SUCCESS)
+            {
+                return FizzyoRequestReturnType.FAILED_TO_CONNECT;
+            }
+                var webRequest = FizzyoNetworking.GetWebRequest(FizzyoNetworking.ApiEndpoint + "games/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/highscores");
+            webRequest.SendWebRequest();
 
-            Dictionary<string, string> headers = new Dictionary<string, string>();
-            headers.Add("Authorization", "Bearer " + FizzyoFramework.Instance.User.AccessToken);
-            WWW sendGetHighscores = new WWW(getHighscores, null, headers);
+            while (!webRequest.isDone) { }
 
-            while (!sendGetHighscores.isDone) { }
-
-            if (sendGetHighscores.error != null)
+            if (webRequest.error != null)
             {
                 return FizzyoRequestReturnType.FAILED_TO_CONNECT;
             }
 
-            string topScoresJSONData = sendGetHighscores.text;
+            string topScoresJSONData = webRequest.downloadHandler.text;
             highscores = JsonUtility.FromJson<AllHighscoreData>(topScoresJSONData).highscores;
 
             return FizzyoRequestReturnType.SUCCESS;
@@ -159,22 +181,22 @@ namespace Fizzyo
         /// </returns>
         public FizzyoRequestReturnType PostScore(int score)
         {
-            string uploadScore = "https://api.fizzyo-ucl.co.uk/api/v1/games/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/highscores";
+            if (FizzyoNetworking.loginResult != LoginReturnType.SUCCESS)
+            {
+                return FizzyoRequestReturnType.FAILED_TO_CONNECT;
+            }
 
-            WWWForm form = new WWWForm();
-            form.AddField("gameSecret", FizzyoFramework.Instance.FizzyoConfigurationProfile.GameSecret);
-            form.AddField("userId", FizzyoFramework.Instance.User.UserID);
-            form.AddField("score", score);
-            Dictionary<string, string> headers = form.headers;
-            headers["Authorization"] = "Bearer " + FizzyoFramework.Instance.User.AccessToken;
+            Dictionary<string, string> formData = new Dictionary<string, string>();
+            formData.Add("gameSecret", FizzyoFramework.Instance.FizzyoConfigurationProfile.GameSecret);
+            formData.Add("userId", FizzyoFramework.Instance.User.UserID);
+            formData.Add("score", score.ToString());
 
-            byte[] rawData = form.data;
+            var webRequest = FizzyoNetworking.PostWebRequest(FizzyoNetworking.ApiEndpoint + "games/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/highscores", formData);
+            webRequest.SendWebRequest();
 
-            WWW sendPostUnlock = new WWW(uploadScore, rawData, headers);
+            while (!webRequest.isDone) { };
 
-            while (!sendPostUnlock.isDone) { };
-
-            if (sendPostUnlock.error != null)
+            if (webRequest.error != null)
             {
                return FizzyoRequestReturnType.FAILED_TO_CONNECT;
             }
@@ -192,25 +214,28 @@ namespace Fizzyo
         /// </returns>
         public FizzyoRequestReturnType UnlockAchievement(string achievementId)
         {
-            string unlockAchievement = "https://api.fizzyo-ucl.co.uk/api/v1/games/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/achievements/" + achievementId + "/unlock" ;
-
-            WWWForm form = new WWWForm();
-            form.AddField("gameSecret", FizzyoFramework.Instance.FizzyoConfigurationProfile.GameSecret);
-            form.AddField("userId", FizzyoFramework.Instance.User.UserID);
-            form.AddField("achievementId", achievementId);
-            Dictionary<string, string> headers = form.headers;
-            headers["Authorization"] = "Bearer " + FizzyoFramework.Instance.User.AccessToken;
-
-            byte[] rawData = form.data;
-
-            WWW sendPostUnlock = new WWW(unlockAchievement, rawData, headers);
-
-            while (!sendPostUnlock.isDone) { };
-
-            if (sendPostUnlock.error != null)
+            if (FizzyoNetworking.loginResult != LoginReturnType.SUCCESS)
             {
                 return FizzyoRequestReturnType.FAILED_TO_CONNECT;
             }
+
+            Dictionary<string, string> formData = new Dictionary<string, string>();
+            formData.Add("gameSecret", FizzyoFramework.Instance.FizzyoConfigurationProfile.GameSecret);
+            formData.Add("userId", FizzyoFramework.Instance.User.UserID);
+            formData.Add("achievementId", achievementId);
+
+            var webRequest = FizzyoNetworking.PostWebRequest(FizzyoNetworking.ApiEndpoint + "games/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/achievements/" + achievementId + "/unlock", formData);
+            webRequest.SendWebRequest();
+
+            while (!webRequest.isDone) { };
+
+            if (webRequest.error != null)
+            {
+                return FizzyoRequestReturnType.FAILED_TO_CONNECT;
+            }
+
+            //Refresh unlocked achievements to get the latest unlocked.
+            LoadUnlockedAchievements();
 
             return FizzyoRequestReturnType.SUCCESS;
         }
@@ -224,6 +249,11 @@ namespace Fizzyo
         /// </returns>
         private FizzyoRequestReturnType PostAchievements()
         {
+            if (FizzyoNetworking.loginResult != LoginReturnType.SUCCESS)
+            {
+                return FizzyoRequestReturnType.FAILED_TO_CONNECT;
+            }
+
             string achievementsToUpload = PlayerPrefs.GetString("achievementsToUpload");
 
             if (achievementsToUpload != "")
@@ -234,25 +264,16 @@ namespace Fizzyo
                 {
                     if (achievementsToUploadArray[i] != "")
                     {
-                        string postUnlock;
+                        Dictionary<string, string> formData = new Dictionary<string, string>();
+                        formData.Add("gameSecret", FizzyoFramework.Instance.FizzyoConfigurationProfile.GameSecret);
+                        formData.Add("userId", FizzyoFramework.Instance.User.UserID);
 
-                        postUnlock = "https://api.fizzyo-ucl.co.uk/api/v1/game/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/achievements/" + achievementsToUploadArray[i] + "/unlock";
+                        var webRequest = FizzyoNetworking.PostWebRequest(FizzyoNetworking.ApiEndpoint + "games/" + FizzyoFramework.Instance.FizzyoConfigurationProfile.GameID + "/achievements/" + achievementsToUploadArray[i] + "/unlock", formData);
+                        webRequest.SendWebRequest();
 
-                        WWWForm form = new WWWForm();
+                        while (!webRequest.isDone) { }
 
-                        form.AddField("gameSecret", FizzyoFramework.Instance.FizzyoConfigurationProfile.GameSecret);
-                        form.AddField("userId", FizzyoFramework.Instance.User.UserID);
-
-                        Dictionary<string, string> headers = form.headers;
-                        headers["Authorization"] = "Bearer " + FizzyoFramework.Instance.User.AccessToken;
-
-                        byte[] rawData = form.data;
-
-                        WWW sendPostUnlock = new WWW(postUnlock, rawData, headers);
-
-                        while (!sendPostUnlock.isDone) { }
-
-                        if (sendPostUnlock.error != null)
+                        if (webRequest.error != null)
                         {
                             return FizzyoRequestReturnType.FAILED_TO_CONNECT;
                         }
@@ -293,6 +314,70 @@ namespace Fizzyo
                 }
             }
                return FizzyoRequestReturnType.SUCCESS;
+        }
+
+        public AchievementData GetAchievement(string AchievementName)
+        {
+            if (allAchievements != null && allAchievements.Length > 0)
+            {
+                for (int i = 0; i < allAchievements.Length; i++)
+                {
+                    if (allAchievements[i].title.ToLower() == AchievementName.ToLower())
+                    {
+                        return allAchievements[i];
+                    }
+                }
+            }
+            return null;
+        }
+
+        public AchievementData GetUnlockedAchievement(string AchievementName)
+        {
+            if (unlockedAchievements != null && unlockedAchievements.Length > 0)
+            {
+                for (int i = 0; i < unlockedAchievements.Length; i++)
+                {
+                    if (unlockedAchievements[i].title.ToLower() == AchievementName.ToLower())
+                    {
+                        return unlockedAchievements[i];
+                    }
+                }
+            }
+            return null;
+        }
+
+        public FizzyoRequestReturnType CheckAndUnlockAchievement(string AchievementName)
+        {
+            if (unlockedAchievements != null)
+            {
+                Debug.LogError("Attempting to unlock [" + AchievementName + "]");
+            }
+            //Check if the user has already gained this achievement
+            var fizzyoUnlockedAchievement = GetUnlockedAchievement(AchievementName);
+
+            // If the player has not had this achievement before, unlock it
+            if (fizzyoUnlockedAchievement != null)
+            {
+                Debug.LogError("[" + AchievementName + "] - Already Unlocked");
+                return FizzyoRequestReturnType.ALREADY_UNLOCKED;
+            }
+
+            //Check if an achievement for this name exists
+            var fizzyoAchievement = GetAchievement(AchievementName);
+
+            if (fizzyoAchievement != null && fizzyoUnlockedAchievement == null)
+            {
+                Debug.LogError("[" + AchievementName + "] - Unlocked");
+
+                return UnlockAchievement(fizzyoAchievement.id);
+            }
+
+            if (unlockedAchievements != null)
+            {
+                Debug.LogError("[" + AchievementName + "] - Not Found");
+            }
+
+            return FizzyoRequestReturnType.NOT_FOUND;
         }
     }
 }

@@ -32,7 +32,7 @@ public class EggControl : MonoBehaviour
     void LateUpdate()
     {
         // Since we have no button, we use up arrow key to simulate
-        if ((fd.ButtonDown() || Input.GetKeyDown(KeyCode.UpArrow)) && grounded && canJump && !Input.GetMouseButtonDown(0))
+        if ((fd.ButtonDown() || Input.GetKeyDown(KeyCode.Space)) && grounded && canJump && !Input.GetMouseButtonDown(0))
         {
             jump = true;
 
